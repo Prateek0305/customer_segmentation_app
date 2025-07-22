@@ -34,9 +34,12 @@ with tab1:
 
     st.subheader("📌 Cluster Distribution")
     cluster_count = df['Cluster'].value_counts().reset_index()
-    fig1 = px.bar(cluster_count, x='index', y='Cluster', color='index',
-                  labels={'index': 'Cluster', 'Cluster': 'Count'},
-                  title='Number of Customers per Cluster')
+   cluster_count_df = cluster_count.reset_index()
+cluster_count_df.columns = ['Cluster', 'Count']
+
+fig1 = px.bar(cluster_count_df, x='Cluster', y='Count', color='Cluster',
+              title='Number of Customers per Cluster')
+
     st.plotly_chart(fig1, use_container_width=True)
 
 with tab2:
