@@ -1,47 +1,47 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import joblib
 import plotly.express as px
 import seaborn as sns
-import joblib
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Customer Segmentation", layout="wide")
 
-st.markdown(
-    "<h1 style='text-align: center; color: #4B8BBE;'>🎯 Customer Segmentation Dashboard</h1>",
-    unsafe_allow_html=True,
-)
+st.title("🎯 Customer Segmentation Dashboard")
 
-uploaded_file = st.file_uploader("Upload your customer data CSV file", type=["csv"])
+uploaded_file = st.file_uploader("Upload a CSV file (optional)", type=["csv"])
 
-if uploaded_file:
-    data = pd.read_csv(uploaded_file)
-    st.success("Data uploaded successfully!")
-    st.dataframe(data.head())
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+else:
+    df = pd.read_csv("Mall_Customers.csv")
 
-    model = joblib.load("kmeans_model.pkl")
-    data['Cluster'] = model.predict(data[['Annual Income (k$)', 'Spending Score (1-100)']])
+model = joblib.load("kmeans_model.pkl")
 
-    cluster_count = data['Cluster'].value_counts().sort_index()
-    cluster_count_df = cluster_count.reset_index()
-    cluster_count_df.columns = ['Cluster', 'Count']
+df['Cluster'] = model.predict(df[['Annual Income (k$)', 'Spending Score (1-100)']])
 
-    fig1 = px.bar(cluster_count_df, x='Cluster', y='Count', color='Cluster',
-                  title='Number of Customers per Cluster',
-                  color_discrete_sequence=px.colors.qualitative.Vivid)
+cluster_count = df['Cluster'].value_counts().reset_index()
+cluster_count.columns = ['Cluster', 'Count']
+
+fig1 = px.bar(cluster_count, x='Cluster', y='Count', color='Cluster',
+              title='Number of Customers per Cluster',
+              color_discrete_sequence=px.colors.qualitative.Pastel)
+
+fig2 = px.scatter(df, x='Annual Income (k$)', y='Spending Score (1-100)',
+                  color='Cluster', title='Customer Segments',
+                  color_discrete_sequence=px.colors.qualitative.Bold,
+                  hover_data=['Gender', 'Age'])
+
+col1, col2 = st.columns(2)
+with col1:
     st.plotly_chart(fig1, use_container_width=True)
-
-    fig2 = px.scatter(data, x='Annual Income (k$)', y='Spending Score (1-100)',
-                      color='Cluster', symbol='Cluster',
-                      title='Income vs Spending Score by Cluster',
-                      color_discrete_sequence=px.colors.qualitative.Bold)
+with col2:
     st.plotly_chart(fig2, use_container_width=True)
 
-    fig3 = px.box(data, x='Cluster', y='Age', color='Cluster',
-                  title='Age Distribution per Cluster',
-                  color_discrete_sequence=px.colors.qualitative.Prism)
-    st.plotly_chart(fig3, use_container_width=True)
+st.subheader("📊 Data Table with Clusters")
+st.dataframe(df.head(20), use_container_width=True)
 
-    with st.expander("Cluster-wise Averages"):
-        cluster_summary = data.groupby('Cluster').mean(numeric_only=True)
-        st.dataframe(cluster_summary.style.background_gradient(cmap='YlGnBu'))
+cluster_summary = df.groupby('Cluster').mean(numeric_only=True)
+
+st.subheader("📌 Cluster Averages")
+st.dataframe(cluster_summary.style.background_gradient(cmap="YlGnBu"), use_container_width=True)
