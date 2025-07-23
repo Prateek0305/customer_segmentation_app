@@ -70,8 +70,6 @@ with tab1:
 with tab2:
     st.subheader("📄 Cluster-wise Summary Table")
     st.dataframe(cluster_summary.style.background_gradient(cmap='Blues'), use_container_width=True)
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:gray;'>Made with ❤️ by Prateek</p>", unsafe_allow_html=True)
 
 with tab3:
     st.subheader("🎯 Distribution of Age")
@@ -91,3 +89,5 @@ with tab3:
 
     st.markdown("These histograms help analyze the spread and concentration of values for age, income, and spending score across all customers.")
 
+st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:gray;'>Made by <strong>Prateek Agrawal</strong></p>", unsafe_allow_html=True)
