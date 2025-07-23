@@ -2,62 +2,64 @@ import streamlit as st
 import pandas as pd
 import joblib
 import plotly.express as px
-import seaborn as sns
-import matplotlib.pyplot as plt
+import os
 
-st.set_page_config(page_title="Customer Segmentation", layout="wide")
+st.set_page_config(page_title="Customer Segmentation App", layout="wide")
 
-st.title("🎯 Customer Segmentation Dashboard")
-
-uploaded_file = st.file_uploader("Upload a CSV file (optional)", type=["csv"])
-
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-else:
-    df = pd.read_csv("Mall_Customers.csv")
+st.markdown("<h1 style='text-align: center; color: #4B8BBE;'>🛍️ Customer Segmentation Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("---")
 
 model = joblib.load("kmeans_model.pkl")
+df = pd.read_csv("Mall_Customers.csv")
 
-df['Cluster'] = model.predict(df[['Annual Income (k$)', 'Spending Score (1-100)']])
+st.sidebar.header("📂 Upload CSV File (optional)")
+uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
 
-cluster_count = df['Cluster'].value_counts().reset_index()
-cluster_count.columns = ['Cluster', 'Count']
+gender_mapping = {"Male": 0, "Female": 1}
+df['Gender'] = df['Gender'].map(gender_mapping)
+df['Cluster'] = model.predict(df[['Gender', 'Age', 'Annual Income (k$)', 'Spending Score (1-100)']])
 
-fig1 = px.bar(cluster_count, x='Cluster', y='Count', color='Cluster',
-              title='Number of Customers per Cluster',
-              color_discrete_sequence=px.colors.qualitative.Pastel)
-
-fig2 = px.scatter(df, x='Annual Income (k$)', y='Spending Score (1-100)',
-                  color='Cluster', title='Customer Segments (Income vs Spending Score)',
-                  color_discrete_sequence=px.colors.qualitative.Bold,
-                  hover_data=['Gender', 'Age'])
-
-fig3 = px.box(df, x='Cluster', y='Age', color='Cluster',
-              title='Age Distribution per Cluster',
-              color_discrete_sequence=px.colors.qualitative.Safe)
-
-fig4 = px.scatter_3d(df, x='Age', y='Annual Income (k$)', z='Spending Score (1-100)',
-                     color='Cluster', title='3D Cluster Distribution',
-                     color_discrete_sequence=px.colors.qualitative.Set3)
-
-col1, col2 = st.columns(2)
-with col1:
-    st.plotly_chart(fig1, use_container_width=True)
-with col2:
-    st.plotly_chart(fig2, use_container_width=True)
-
-col3, col4 = st.columns(2)
-with col3:
-    st.plotly_chart(fig3, use_container_width=True)
-with col4:
-    st.plotly_chart(fig4, use_container_width=True)
-
-st.subheader("📊 Data Table with Cluster Labels")
-st.dataframe(df.head(30), use_container_width=True)
-
-st.subheader("📌 Cluster Averages")
 cluster_summary = df.groupby('Cluster').mean(numeric_only=True)
-st.dataframe(cluster_summary.style.background_gradient(cmap="YlGnBu"), use_container_width=True)
+cluster_count = df['Cluster'].value_counts().reset_index()
+cluster_count.columns = ['index', 'Cluster']
 
-st.markdown("---")
-st.caption("Created by Prateek Agrawal – Mall Customer Segmentation using KMeans")
+tab1, tab2 = st.tabs(["📊 Visual Insights", "📄 Cluster Summary"])
+
+with tab1:
+    st.subheader("📊 Cluster Distribution")
+    fig1 = px.bar(cluster_count, x='index', y='Cluster', color='index',
+                  labels={'index': 'Cluster', 'Cluster': 'Count'},
+                  title='Number of Customers per Cluster',
+                  color_discrete_sequence=px.colors.sequential.Plasma)
+    st.plotly_chart(fig1, use_container_width=True)
+    st.markdown("This chart shows how many customers belong to each cluster. It helps in understanding which group is the largest or smallest.")
+
+    st.subheader("📈 Cluster-wise Average Annual Income")
+    fig2 = px.bar(cluster_summary.reset_index(), x='Cluster', y='Annual Income (k$)',
+                  color='Cluster', title='Average Annual Income per Cluster',
+                  color_discrete_sequence=px.colors.sequential.Viridis)
+    st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("This shows the average income of customers in each cluster. Useful for targeting based on financial capability.")
+
+    st.subheader("🧓 Cluster-wise Average Age")
+    fig3 = px.bar(cluster_summary.reset_index(), x='Cluster', y='Age',
+                  color='Cluster', title='Average Age per Cluster',
+                  color_discrete_sequence=px.colors.sequential.Cividis)
+    st.plotly_chart(fig3, use_container_width=True)
+    st.markdown("This helps visualize the age group dominating each cluster — useful for age-targeted marketing.")
+
+    st.subheader("💸 Cluster-wise Average Spending Score")
+    fig4 = px.bar(cluster_summary.reset_index(), x='Cluster', y='Spending Score (1-100)',
+                  color='Cluster', title='Average Spending Score per Cluster',
+                  color_discrete_sequence=px.colors.sequential.Aggrnyl)
+    st.plotly_chart(fig4, use_container_width=True)
+    st.markdown("This chart represents how actively customers in each cluster spend. It helps prioritize high-spending groups.")
+
+with tab2:
+    st.subheader("📄 Cluster-wise Summary Table")
+    st.dataframe(cluster_summary.style.background_gradient(cmap='Blues'), use_container_width=True)
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:gray;'>Made with ❤️ by Prateek</p>", unsafe_allow_html=True)
