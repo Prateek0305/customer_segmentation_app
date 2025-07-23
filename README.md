@@ -2,7 +2,7 @@
 
 ![Project Demo](project_video.gif)
 
-[🔗 Live App Link][[https://customer-segmentation-prateek.streamlit.app/](https://customer-segmentation-prateek.streamlit.app/)]
+🔗 Live App Link[[https://customer-segmentation-prateek.streamlit.app/](https://customer-segmentation-prateek.streamlit.app/)]
 
 ---
 
@@ -91,12 +91,7 @@ This was created during my internship at **Celebal Technology** to:
 
 ## 📂 Folder Structure
 
-customer_segmentation_app/
-├── app.py
-├── kmeans_model.pkl
-├── Mall_Customers.csv
-├── project_vid.gif
-└── README.md
+<pre> <code> customer_segmentation_app/ ├── app.py ├── kmeans_model.pkl ├── Mall_Customers.csv ├── project_vid.gif └── README.md </code> </pre>
 
 
 ---
