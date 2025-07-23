@@ -90,8 +90,13 @@ This was created during my internship at **Celebal Technology** to:
 ---
 
 ## 📂 Folder Structure
+- `customer_segmentation_app/`
+  - `app.py`
+  - `kmeans_model.pkl`
+  - `Mall_Customers.csv`
+  - `project_vid.gif`
+  - `README.md`
 
-<pre> <code> customer_segmentation_app/ ├── app.py ├── kmeans_model.pkl ├── Mall_Customers.csv ├── project_vid.gif └── README.md </code> </pre>
 
 
 ---
