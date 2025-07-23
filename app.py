@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 import plotly.express as px
-import os
 
 st.set_page_config(page_title="Customer Segmentation App", layout="wide")
 
@@ -19,7 +18,9 @@ if uploaded_file is not None:
 
 gender_mapping = {"Male": 0, "Female": 1}
 df['Gender'] = df['Gender'].map(gender_mapping)
-df['Cluster'] = model.predict(df[['Gender', 'Age', 'Annual Income (k$)', 'Spending Score (1-100)']])
+
+X = df[['Gender', 'Age', 'Annual Income (k$)', 'Spending Score (1-100)']].values
+df['Cluster'] = model.predict(X)
 
 cluster_summary = df.groupby('Cluster').mean(numeric_only=True)
 cluster_count = df['Cluster'].value_counts().reset_index()
