@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(page_title="Customer Segmentation App", layout="wide")
 
@@ -26,7 +28,7 @@ cluster_summary = df.groupby('Cluster').mean(numeric_only=True)
 cluster_count = df['Cluster'].value_counts().reset_index()
 cluster_count.columns = ['index', 'Cluster']
 
-tab1, tab2 = st.tabs(["📊 Visual Insights", "📄 Cluster Summary"])
+tab1, tab2, tab3 = st.tabs(["📊 Visual Insights", "📄 Cluster Summary", "🔍 Feature Distributions"])
 
 with tab1:
     st.subheader("📊 Cluster Distribution")
@@ -58,9 +60,34 @@ with tab1:
     st.plotly_chart(fig4, use_container_width=True)
     st.markdown("This chart represents how actively customers in each cluster spend. It helps prioritize high-spending groups.")
 
+    st.subheader("📡 3D Scatter Plot of Clusters")
+    fig5 = px.scatter_3d(df, x='Annual Income (k$)', y='Spending Score (1-100)', z='Age',
+                         color='Cluster', title='Customer Segments in 3D',
+                         color_discrete_sequence=px.colors.qualitative.Set3)
+    st.plotly_chart(fig5, use_container_width=True)
+    st.markdown("This 3D plot shows the relationship between income, spending, and age across clusters.")
+
 with tab2:
     st.subheader("📄 Cluster-wise Summary Table")
     st.dataframe(cluster_summary.style.background_gradient(cmap='Blues'), use_container_width=True)
-
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:gray;'>Made with ❤️ by Prateek</p>", unsafe_allow_html=True)
+
+with tab3:
+    st.subheader("🎯 Distribution of Age")
+    fig6, ax1 = plt.subplots()
+    sns.histplot(df['Age'], bins=20, kde=True, ax=ax1, color='#4B8BBE')
+    st.pyplot(fig6)
+
+    st.subheader("💼 Distribution of Annual Income")
+    fig7, ax2 = plt.subplots()
+    sns.histplot(df['Annual Income (k$)'], bins=20, kde=True, ax=ax2, color='#306998')
+    st.pyplot(fig7)
+
+    st.subheader("🛍️ Distribution of Spending Score")
+    fig8, ax3 = plt.subplots()
+    sns.histplot(df['Spending Score (1-100)'], bins=20, kde=True, ax=ax3, color='#FFE873')
+    st.pyplot(fig8)
+
+    st.markdown("These histograms help analyze the spread and concentration of values for age, income, and spending score across all customers.")
+
